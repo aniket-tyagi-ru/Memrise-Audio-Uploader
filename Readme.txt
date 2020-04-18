@@ -23,7 +23,7 @@ Support for more languages may be added in the future.
 
     cd <folder address>
     Example:
-      cd C:\Memrise_Uploader
+      cd C:\Memrise-Audio-Uploader-master\
 
 3. Run the program like this:
 
