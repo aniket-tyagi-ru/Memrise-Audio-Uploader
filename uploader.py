@@ -7,13 +7,13 @@ import time
 try:
     import requests
 except:
-    subprocess.call('pip install requests')
+    subprocess.call([sys.executable,'-m','pip','install','requests'])
     import requests
 
 try:
     from bs4 import BeautifulSoup
 except:
-    subprocess.call('pip install beautifulsoup4')
+    subprocess.call([sys.executable,'-m','pip','install','beautifulsoup4'])
     from bs4 import BeautifulSoup
 
 from variables import *
