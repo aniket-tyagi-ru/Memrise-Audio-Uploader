@@ -170,7 +170,7 @@ def mem_process_table(session, rows, l_col, a_col, url):
             try:
                 x = baidu_query(word)
             except:
-                print("Baidu Connection Error")
+                print("Error")
             if x == 0:
                 continue
             else:
@@ -188,30 +188,47 @@ def mem_process_table(session, rows, l_col, a_col, url):
 
 def baidu_query(word):
     """Queries for 'word' in Baidu and downloads audio"""
+    def get_term_header(bs_baidu):
+        """Find term header on dictionary page"""
+        term_header = bs_baidu.find("div", attrs = {"id": "term-header"} )
+        if not term_header:
+            term_header = bs_baidu.find("div", attrs = {"id": "word-header"} )
+        if not term_header:
+            return 0
+        return term_header
+
     website = "https://dict.baidu.com"
     url =  website + "/s?wd=" + word
     #Get url
-    response = requests.get(url, headers = baidu_get_headers)
-    bs_baidu = BeautifulSoup(response.text, 'html.parser')
+    try:
+        response = requests.get(url, headers = baidu_get_headers)
+        bs_baidu = BeautifulSoup(response.text, 'html.parser')
+    except:
+        print("Request error")
+        return 0
     # Q: Is response an Entry page or Search Results?
-    # A: Only Entry page has div with id "term-header"
-    term_header = bs_baidu.find("div", attrs = {"id": "term-header"} )
-    if not term_header:
-        print("Search results...")
+    # A: Only Entry page has div with id "term-header" or "word-header"
+    term_header = get_term_header(bs_baidu)
+    if term_header == 0:
         #In first search result, if exact match to 'word' is found, proceed
-        bs_search_item = bs_baidu.find("div", attrs = {"class": "poem-list-item"})
-        text = bs_search_item.find("a").get_text().replace(" ","").replace("\n","")
-        chars = len(word)
-        print(str(chars) + " - " + word + " (word)")
-        print(str(len(text[:chars])) + " - " + text[:chars] + " (text)")
-
+        try:
+            bs_search_item = bs_baidu.find("div", attrs = {"class": "poem-list-item"})
+            text = bs_search_item.find("a").get_text().replace(" ","").replace("\n","")
+            chars = len(word)
+            print(str(chars) + " - " + word + " (word)")
+            print(str(len(text[:chars])) + " - " + text[:chars] + " (text)")
+        except:
+            print("Problem with search results")
+            return 0
+        print("Search results...")
         if text[:chars] == word:
             print("Exact match found.")
             url = website + bs_search_item.find("a").get("href")
             response = requests.get(url, headers = baidu_get_headers)
             bs_baidu = BeautifulSoup(response.text, 'html.parser')
+            term_header = bs_baidu.find("div", attrs = {"id": "term-header"} )
             #Try to download the audio
-            return baidu_download(bs_baidu, word)
+            return baidu_download(term_header, word)
         #If exact match is not found, return an error
         else:
             print("Exact match not found for: " + word)
@@ -219,11 +236,11 @@ def baidu_query(word):
     else:
         print("Entry found...")
         #Try to download the audio
-        return baidu_download(bs_baidu, word)
+        return baidu_download(term_header, word)
 
-def baidu_download(bs_baidu, word):
+def baidu_download(term_header, word):
     """Download audio from entry page"""
-    audio_url = bs_baidu.find("a", url = re.compile("ss0.baidu.com"))
+    audio_url = term_header.find("a", class_ = re.compile("mp3"))
     if audio_url is None:
         print("Audio URL not found.")
         return 0
