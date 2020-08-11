@@ -18,9 +18,9 @@ def assign_inputs(inputs):
     mem_audio_post_headers['referer'] = database_url
     return database_url, lang_header, aud_header
 
-login_url = "https://www.memrise.com/login/"
+login_url = "https://app.memrise.com/login/"
 database_url = ""
-home_url = "https://www.memrise.com/home/"
+home_url = "https://app.memrise.com/home/"
 lang_header = ""
 aud_header = ""
 
@@ -45,7 +45,7 @@ mem_login_post_headers = {
     # "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     # "Accept-Language": "en-GB,en;q=0.5",
     # "Accept-Encoding": "gzip, deflate, br",
-    "Referer": "https://www.memrise.com/login/",
+    "Referer": "https://app.memrise.com/login/",
     # "Content-Type": "application/x-www-form-urlencoded",
     # "Content-Length": "130",
     # "Origin": "https://www.memrise.com",
