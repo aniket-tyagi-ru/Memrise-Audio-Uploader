@@ -2,7 +2,7 @@ from tkinter import *
 import uploader
 
 def run_uploader(inputs):
-    print("Button is working")
+    #print("Button is working")
     for a in range(len(inputs)):
         inputs[a] = inputs[a].get()
     uploader.main(inputs)
@@ -48,12 +48,9 @@ def launch_app():
     r_frame.pack(side = RIGHT)
 
     items = []
-    el_user = Label(m_frame, text = "Username")
+    el_user = Label(m_frame, text = "Cookie")
     ef_user = Entry(m_frame)
     items.append(el_user), items.append(ef_user)
-    el_password = Label(m_frame, text = "Password")
-    ef_password = Entry(m_frame)
-    items.append(el_password), items.append(ef_password)
     el_url = Label(m_frame, text = "Database URL")
     ef_url = Entry(m_frame)
     items.append(el_url), items.append(ef_url)

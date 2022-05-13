@@ -3,6 +3,7 @@ import sys
 import subprocess
 import re
 import time
+from pprint import pprint
 
 try:
     import requests
@@ -16,29 +17,23 @@ except:
     subprocess.call([sys.executable,'-m','pip','install','beautifulsoup4'])
     from bs4 import BeautifulSoup
 
-from variables import *
+import variables as v
 
 #1
 
-def mem_login(login_data, get_headers = mem_login_get_headers, post_headers = mem_login_post_headers):
-    """Memrise auto login"""
-    #Start session
-    session = requests.Session()
-    #GET request to the login page
-    response = session.get(login_url, headers = get_headers)
-    print("GET: " + str(response.status_code))
-    csrftoken = session.cookies.get_dict()['csrftoken']
-    #POST request to the login page
-    login_data = mem_login_post_data
-    login_data['csrfmiddlewaretoken'] = csrftoken
-    response = session.post(login_url, data = login_data,
-                                    headers = post_headers)
-    print("POST: " + str(response.status_code))
-    if response.status_code != 200:
-        raise Exception("Access Denied")
-    return session, response
+##def mem_login(login_data, get_headers = v.mem_login_get_headers):
+##    """Memrise auto login"""
+##    #Start session
+##    session = requests.Session()
+##    response = session.get('https://app.memrise.com/home/',
+##                                    headers = get_headers)
+##    print("GET: " + str(response.status_code))
+##    print(session.cookies.get_dict())
+##    if response.status_code != 200:
+##        raise Exception("Access Denied")
+##    return session, response
 
-def mem_database_page(session, url, headers = mem_edit_get_headers):
+def mem_database_page(session, url, headers = v.mem_edit_get_headers):
     """Memrise database page"""
     response = session.get(url, headers = headers)
     print("GET: " + str(response.status_code))
@@ -47,6 +42,7 @@ def mem_database_page(session, url, headers = mem_edit_get_headers):
 def mem_soupify(response):
     """Apply Beautiful Soup to page"""
     bs_database = BeautifulSoup(response.text, 'html.parser')
+    #print(bs_database)
     return bs_database
 
 def mem_soupify_table(response, lang_header, aud_header):
@@ -175,12 +171,12 @@ def mem_process_table(session, rows, l_col, a_col, url):
                 continue
             else:
                 #Reload edit course page
-                headers = mem_edit_get_headers
+                headers = v.mem_edit_get_headers
                 headers['Referer'] = url
                 session, response = mem_database_page(session, url = url, headers = headers)
                 #Upload word to memrise
                 csrftoken = session.cookies.get_dict()['csrftoken']
-                data = mem_audio_post_data
+                data = v.mem_audio_post_data
                 data["csrfmiddlewaretoken"] = csrftoken
                 data["thing_id"] = int(rows[row].get("data-thing-id"))
                 data["cell_id"] = a_col
@@ -198,7 +194,7 @@ def baidu_query(word):
     website = "https://dict.baidu.com"
     url = website + "/s?wd=" + word
     #Get url
-    response = requests.get(url, headers = baidu_get_headers)
+    response = requests.get(url, headers = v.baidu_get_headers)
     bs_baidu = BeautifulSoup(response.text, 'html.parser')
     # Q: Is response an Entry page or Search Results?
     # A: Only Entry page has div with id "term-header" or "word-header"
@@ -219,7 +215,7 @@ def baidu_query(word):
             print("Exact match found.")
             try:
                 url = website + bs_search_item.find("a").get("href")
-                response = requests.get(url, headers = baidu_get_headers)
+                response = requests.get(url, headers = v.baidu_get_headers)
                 bs_baidu = BeautifulSoup(response.text, 'html.parser')
                 term_header = get_term_header(bs_baidu)
             except:
@@ -250,7 +246,7 @@ def baidu_download(term_header, word):
         try:
             audio_url = audio_url.get("url")
             print("Downloading")
-            response = requests.get(audio_url, headers = baidu_get_headers)
+            response = requests.get(audio_url, headers = v.baidu_get_headers)
             filename = word + ".mp3"
             open(os.path.join(os.path.dirname(__file__), "audio", filename), "wb").write(response.content)
             return 1
@@ -258,26 +254,33 @@ def baidu_download(term_header, word):
             print("Download error")
             return 0
 
-def mem_upload_audio(session, data, word, headers = mem_audio_post_headers):
+def mem_upload_audio(session, data, word, headers = v.mem_audio_post_headers):
     """Upload audio to Memrise (Ajax POST request)"""
-    url = "https://www.memrise.com/ajax/thing/cell/upload_file/"
+    url = "https://app.memrise.com/ajax/thing/cell/upload_file/"
     filename = word + ".mp3"
     file = open(os.path.join(os.path.dirname(__file__),"audio",filename), "rb")
     files = {"f": file}
     print("Uploading: " + filename)
     response = session.post(url, headers = headers, data = data, files = files)
     print("POST: " + str(response.status_code))
+    if response.status_code == 400:
+        raise Exception("Upload Error")
     return session
 
 #Main
 
-def main(inputs = []):
+def main(inputs=None):
     #Assign inputs
-    if inputs:
-        database_url, lang_header, aud_header = assign_inputs(inputs)
-    #Login
-    session, response = mem_login(login_data = mem_login_post_data)
-    session, response = mem_database_page(session, url = database_url)
+    if inputs != None:
+        database_url, lang_header, aud_header = v.assign_inputs(inputs)
+    else:
+        database_url = v.database_url
+        lang_header = v.lang_header
+        aud_header = v.aud_header
+        
+    #Get initial database page
+    session = requests.Session()
+    session, response = mem_database_page(session, database_url)
     #Get number of database pages
     database = mem_soupify(response)
     last_page = mem_last_page_number(database)
