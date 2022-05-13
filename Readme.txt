@@ -1,4 +1,4 @@
-== MEMRISE AUDIO UPLOADER V 1.0 ==
+== MEMRISE AUDIO UPLOADER V 1.1 ==
 
 At the moment, the uploader only supports the following languages:
 
@@ -34,10 +34,13 @@ Support for more languages may be added in the future.
 
 --USAGE--
 
-1. Enter your Memrise username and password in the fields provided
-
-*THIS PROGRAM DOES NOT SAVE YOUR LOG IN DETAILS OR TRANSMIT THEM TO ANYWHERE
-OTHER THAN MEMRISE*
+1. Copy paste your Memrise Cookie. 
+How to get the cookie:
+- Sign in to Memrise in your browser
+- Open Developer Console (cltr+i)
+- Reload the dashboard page
+- Go to 'network' tab in developer console and click the file named 'dashboard'. 
+- Click on Headers. Then you will see "Cookie" under "Request Headers"
 
 2. Copy paste the Database URL
     Example: https://www.memrise.com/course/5540383/hsk-level-6-definitive-edition/edit/database/6560460/
