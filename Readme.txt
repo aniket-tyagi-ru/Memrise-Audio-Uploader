@@ -37,7 +37,7 @@ Support for more languages may be added in the future.
 1. Copy paste your Memrise Cookie. 
 How to get the cookie:
 - Sign in to Memrise in your browser
-- Open Developer Console (cltr+i)
+- Open Developer Console (ctrl+shift+i)
 - Reload the dashboard page
 - Go to 'network' tab in developer console and click the file named 'dashboard'. 
 - Click on Headers. Then you will see "Cookie" under "Request Headers"
@@ -59,8 +59,7 @@ Enjoy!
 
 --KNOWN ISSUES--
 
-- Baidu can sometimes throw connection errors from their end. You can run the
-  script a couple of more times through the database to fill the gaps.
+- Does not work well with databases that have 1000+ items (Memrise refuses to update the Audio fields through this method). Splitting larger databases into several smaller ones could help. Last tested in the beginning of 2022.
 
 - Deleting the 'audio' folder breaks the script.
   (However, you can safely delete the files inside the folder)
